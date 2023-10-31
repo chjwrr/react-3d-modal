@@ -1,112 +1,46 @@
-import React, { Suspense, useRef } from 'react';
-import logo from './logo.svg';
-import './App.css';
-//@ts-ignore
-import {OBJModel,GLTFModel,AmbientLight,DirectionLight,DAEModel} from 'react-3d-viewer'
-
-import * as THREE from 'three';
-
-
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { Canvas } from "@react-three/fiber";
-import { Environment, OrbitControls } from "@react-three/drei";
-
-import { useLoader } from '@react-three/fiber'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader'
-
+import { Environment, OrbitControls,useProgress,Html } from "@react-three/drei";
 import LittlestTokyoModal from './modals/LittlestTokyo'
-
-function Scene() {
-  const obj = useLoader(OBJLoader, "/modal/female021.obj")
-  return <primitive object={obj} scale={0.02}  />
-}
-
 function App() {
+  const [show,setShow] = useState(false)
+  const [screenWidth,setScreenWidth] = useState(0)
+  useEffect(()=>{
+    setShow(true)
+    setScreenWidth(window.innerWidth)
+  },[])
   return (
-    <div>
-      <OBJModel 
-        width="300" height="300"  
-        position={{x:0,y:-100,z:0}} 
-        src="/modal/female021.obj"
-        onLoad={()=>{
-          //...
-        }}
-        onProgress={(xhr:any)=>{
-          console.log('xhr===',xhr)
-        }}
-      />
-
-<div style={{
-  width:300,
-  height:300,
-  background:'yellow'
-}}>
-      <GLTFModel
-        src="/modal/DamagedHelmet.gltf"
-      >
-        {/* <AmbientLight color={0xffff00}/>
-        <DirectionLight color={0x00ffff} position={{x:100,y:200,z:100}}/>
-        <DirectionLight color={0xff00ff} position={{x:-100,y:200,z:-100}}/> */}
-      </GLTFModel>
-    </div>
-
-    <div>
-      <DAEModel 
-        src={'/modal/b.dae'}
-        onLoad={()=>{
-          // ...
-        }}
-      >
-        <DirectionLight color={'#fff'}/>
-      </DAEModel>
-    </div>
-
-
-
-
-
-
-      <Canvas style={{
-        width:500,
-        height:800,
-        // marginTop:100,
-        // marginLeft:100,
-        background:'red'
-      }}>
-       {/* <ambientLight  intensity={0.5} /> */}
-        {/* <directionalLight color={'#fff'} position={[0,0,5]} /> */}
-        {/* <pointLight color={'#fff'} position={[0,0,0]}/> */}
-        {/* <perspectiveCamera position={[0,0,5]} fov={60} near={0.1} far={1000}/> */}
-
-        {/* <ambientLight /> */}
-        <pointLight position={[10, 10, 10]} />
-        <mesh receiveShadow={false} castShadow={false}>
-        <Scene/>
-
-        </mesh>
-        <OrbitControls />
-        {/* <Environment preset="sunset" background /> */}
-      </Canvas>
-
-      <Canvas style={{
-        width:1000,
-        height:1000,
-        // marginTop:100,
-        // marginLeft:100,
-        background:'black'
-      }}>
-        <Suspense fallback={null}>
-          <ambientLight intensity={0.5}/>
+    show?<Canvas style={{
+      width:screenWidth,
+      height:screenWidth,
+      background:'#fff'
+    }}>
+      <Suspense fallback={<Loader/>}>
+        <ambientLight intensity={0.5}/>
           <directionalLight position={[-2,5,2]}/>
           <OrbitControls/>
-          <LittlestTokyoModal/>
+          <LittlestTokyoModal scale={[0.008, 0.008, 0.01]}/>
         </Suspense>
-      </Canvas>
-
-
-
+    </Canvas> : <div>
+      loading。。。
     </div>
-  );
+  )
 }
-
+function Loader() {
+  const { active, progress, errors, item, loaded, total } = useProgress();
+  return <Html fullscreen>
+    <div style={{
+      color:'red',
+      display:'flex',
+      flexDirection:'row',
+      width:'100%',
+      background:'blue',
+      height:'100%',
+      justifyContent:'center',
+      alignItems:'center'
+      }}>
+      模型加载中:{progress.toFixed(2)} %
+    </div>
+  </Html>;
+}
 export default App;
